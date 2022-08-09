@@ -1,4 +1,6 @@
 {
-    "serverUrl": "http://paranoidandroid.network:52042",
-    "serverPort": 52042
+    "connectionInfo": {
+        "url": "http://paranoidandroid.network",
+        "port": 52042
+    }
 }
