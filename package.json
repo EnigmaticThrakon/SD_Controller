@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "@microsoft/signalr": "^6.0.7"
+    "@microsoft/signalr": "^6.0.7",
+    "config": "^3.3.7"
   }
 }
