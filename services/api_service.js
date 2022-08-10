@@ -7,7 +7,11 @@ module.exports = class ApiService {
     }
 
     async connect(serialNumber) {
-        return performGet('/api/Units/Connect', [ serialNumber ]);
+        return await this.performPut('api/Unit/UnitData', {
+            id: null,
+            serialNumber: serialNumber,
+            publicIP: null
+        });
     }
 
     // Base function to get data from a GET endpoint
