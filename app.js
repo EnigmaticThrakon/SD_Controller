@@ -18,7 +18,17 @@ var apiHandler = new ApiService(connectionInfo.url, connectionInfo.port);
 run();
 
 async function run() {
-    var response = await apiHandler.performPost("api/Test/testPost", { id: "3451c9d3-6ea1-473d-ac3c-31d28af0ae81", deviceId: "abc", publicIP: "127.0.0.1" });
+    var response = await apiHandler.connect(deviceInfo.serialNumber);
+
+    if(response.success) {
+        deviceInfo.unitId = response.data;
+    } else {
+        console.log(response.data);
+        return;
+    }
+
+    signalR = new SignalRService(connectionInfo.url, connectionInfo.port, deviceInfo.unitId);
+    signalR.connect();
 
     while(true) {
         await delay(10000);
