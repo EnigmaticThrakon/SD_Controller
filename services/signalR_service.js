@@ -6,7 +6,7 @@ module.exports = class SignalRService {
         this.unitId = unitId;
         this.basePort = port;
         this.hubConnection = new signalR.HubConnectionBuilder()
-            .withUrl(`${baseUrl}:${basePort}/agerDeviceHub?unit=${unitId}`)
+            .withUrl(`${this.baseUrl}:${this.basePort}/agerDeviceHub?unit=${this.unitId}`)
             .withAutomaticReconnect()
             .build();
     }
