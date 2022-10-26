@@ -45,6 +45,24 @@ network:
                 "<wifi-name>":
                     password: "<password>"
 ```
+
+*For connecting to an enterprise network*
+```
+network:
+    version: 2
+    renderer: networkd
+    wifis:
+        wlan0:
+            dhcp4: yes
+            dhcp6: yes
+            access-points:
+                "<wifi-name>":
+                    auth:
+                        key-management: eap
+                        identity: "<login>"
+                        password: "<password>"
+```
+
 `sudo netplan generate && sudo netplan try && sudo netplan apply`
 
 reboot
