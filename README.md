@@ -4,3 +4,48 @@ This repository will hold the project dedicated to communicating with the interm
     execute certain commands and store data passed to it from the user
 
 To be run on Raspberry Pi or other controller to be used on device
+
+**Connecting to Internet Through Ethernet to Another Computer**
+> Control Panel
+
+> Network and Internet
+
+> Network and Sharing Center
+
+> Private Network (Click Network Name)
+
+> Properties
+
+> Sharing
+
+> Enable and select Ethernet (Whichever one the device is connected to)
+
+> Click Ok
+
+Steps to setting up environment:
+
+If `/etc/netplan/` directory doesn't exist: `sudo apt install netplan.io`
+
+`sudo rfkill unblock wifi`
+`sudo ifconfig wlan0 up`
+
+reboot
+
+Change or Create YAML file in `netplan` directory:
+
+```
+network:
+    version: 2
+    renderer: networkd
+    wifis:
+        wlan0:
+            dchp4: yes
+            dchp6: yes
+            access-points:
+                "<wifi-name>":
+                    password: "<password>"
+```
+`sudo netplan generate && sudo netplan try && sudo netplan apply`
+
+reboot
+Check network connction: `ip -a`
