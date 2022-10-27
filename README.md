@@ -65,3 +65,27 @@ network:
 
 reboot
 Check network connction: `ip a`
+
+Install SQLite:
+
+sudo apt update
+
+sudo apt install sqlite3
+
+sudo apt-get install libsqlite3-dev
+
+Install Redis:
+
+sudo apt-get update
+
+sudo apt-get install redis
+
+Install Hiredis:
+
+sudo apt-get update
+
+sudo apt-get install libhiredis-dev
+
+Install CMake:
+
+sudo apt-get install cmake
