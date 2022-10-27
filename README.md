@@ -26,11 +26,6 @@ Steps to setting up environment:
 
 If `/etc/netplan/` directory doesn't exist: `sudo apt install netplan.io`
 
-`sudo rfkill unblock wifi`
-`sudo ifconfig wlan0 up`
-
-reboot
-
 Change or Create YAML file in `netplan` directory:
 
 ```
@@ -39,8 +34,8 @@ network:
     renderer: networkd
     wifis:
         wlan0:
-            dchp4: yes
-            dchp6: yes
+            dhcp4: yes
+            dhcp6: yes
             access-points:
                 "<wifi-name>":
                     password: "<password>"
@@ -65,5 +60,8 @@ network:
 
 `sudo netplan generate && sudo netplan try && sudo netplan apply`
 
+`sudo rfkill unblock wifi`
+`sudo ifconfig wlan0 up`
+
 reboot
-Check network connction: `ip -a`
+Check network connction: `ip a`
