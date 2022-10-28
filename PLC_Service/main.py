@@ -16,50 +16,30 @@ def simulate():
         }
 
         simulated_data_string = json.dumps(simulated_data, default=str)
+        print(simulated_data_string)
+        if acquisition_started:
+            redis_context.publish("live:data", simulated_data_string)
 
-        redis_context.publish("live:data", simulated_data_string)
         sleep(1)
 
 def shutdown(data):
     global service_running
 
-    start_sub.unsubscribe()
-    stop_sub.unsubscribe()
-    shutdown_sub.unsubscribe()
-
-    stop(None)
-
-    redis_context.rpush("logs:" + service_name, "Shutting Down Service")
-    redis_context.close()
-
     service_running = False
 
 def stop(data):
-    global stop_thread
-    global work_th
+    global acquisition_started
 
-    stop_thread = True
-
-    while work_th.is_alive():
-        work_th.join()
-        sleep(1)
-
+    acquisition_started = False
     redis_context.rpush("logs:" + service_name, "Stopping Data Acquisition")
-    work_th = threading.Thread(target=simulate, daemon=True)
 
 def start(data):
-    global stop_thread
+    global acquisition_started
 
-    stop_thread = False
-
-    work_th.start()
-
+    acquisition_started = True
     redis_context.rpush("logs:" + service_name, "Starting Data Acquisition")
 
 def setup_subscribers():
-    global start_th
-    global stop_th
-    global shutdown_th
     global start_sub
     global stop_sub
     global shutdown_sub
@@ -79,8 +59,9 @@ def setup_subscribers():
 def main():
     global redis_context
     global service_name
-    global work_th
     global service_running
+    global acquisition_started
+    global stop_thread
 
     service_name = "plc_service"
 
@@ -89,12 +70,29 @@ def main():
         print("Error Connecting to Redis")
 
     redis_context.rpush("logs:" + service_name, "Successfully Connected to Redis")
+
+    stop_thread = False
     work_th = threading.Thread(target=simulate, daemon=True)
+    work_th.start()
+
+    acquisition_started = False
     setup_subscribers()
     
     service_running = True
     while service_running:
         sleep(1)
+
+    start_sub.unsubscribe()
+    stop_sub.unsubscribe()
+    shutdown_sub.unsubscribe()
+
+    stop_thread = True
+    while work_th.is_alive():
+        work_th.join()
+        sleep(1)
+
+    redis_context.rpush("logs:" + service_name, "Shutting Down Service")
+    redis_context.close()
 
 if __name__ == '__main__':
     main()
