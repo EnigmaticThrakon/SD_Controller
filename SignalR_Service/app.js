@@ -3,7 +3,10 @@ process.env.NODE_ENV = 'config';
 const { spawn, exec, execSync } = require('child_process');
 const config = require('config');
 
-var connectionInfo = config.get("connectionInfo");
+var connectionInfo = {
+    "url": "http://paranoidandroid.network",
+    "port": 52042
+};
 
 var deviceInfo = {};
 deviceInfo.serialNumber = execSync('cat /proc/cpuinfo | grep Serial').toString().split(':')[1].trim();
