@@ -1,14 +1,21 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "SignalR Service",
+            "program": "${workspaceFolder}/SignalR_Service/app.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node",
+            "runtimeExecutable": "/home/pi/.nvm/versions/node/v19.0.0/bin/node",
+        },
+        {
+            "name": "PLC Service",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
+            "program": "${workspaceFolder}/PLC_Service/main.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }
