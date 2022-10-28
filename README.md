@@ -6,27 +6,23 @@ This repository will hold the project dedicated to communicating with the interm
 To be run on Raspberry Pi or other controller to be used on device
 
 **Connecting to Internet Through Ethernet to Another Computer**
-> Control Panel
+1. Control Panel
+2. Network and Internet
+3. Network and Sharing Center
+4. Click on the Private/Wi-Fi network
+5. Properties
+6. Sharing
+7. Select both checkboxes
+8. Select `Ethernet` from the dropdown (or whatever the wired connection is)
+9. Ok
 
-> Network and Internet
+## Setting Up Environment:
 
-> Network and Sharing Center
+------------------------
+### Wi-Fi
+> If `/etc/netplan/` directory doesn't exist: `sudo apt install netplan.io`
 
-> Private Network (Click Network Name)
-
-> Properties
-
-> Sharing
-
-> Enable and select Ethernet (Whichever one the device is connected to)
-
-> Click Ok
-
-Steps to setting up environment:
-
-If `/etc/netplan/` directory doesn't exist: `sudo apt install netplan.io`
-
-Change or Create YAML file in `netplan` directory:
+1. Change or Create YAML file in `netplan` directory:
 
 ```
 network:
@@ -57,35 +53,31 @@ network:
                         identity: "<login>"
                         password: "<password>"
 ```
+2. `sudo netplan generate && sudo netplan try && sudo netplan apply`
+3. `sudo rfkill unblock wifi`
+4. `sudo ifconfig wlan0 up`
+5. `sudo shutdown -r now`
+--------------------
 
-`sudo netplan generate && sudo netplan try && sudo netplan apply`
+### SQLite
 
-`sudo rfkill unblock wifi`
-`sudo ifconfig wlan0 up`
+> `sudo apt-get install sqlite3 && sudo apt-get install libsqlite3-dev`
+--------------------
 
-reboot
-Check network connction: `ip a`
+### Redis
 
-Install SQLite:
+> `sudo apt-get install redis && sudo apt-get install libhiredis-dev`
+--------------------
 
-sudo apt update
+### CMake
 
-sudo apt install sqlite3
+> `sudo apt-get install cmake`
+--------------------
 
-sudo apt-get install libsqlite3-dev
+### Node
 
-Install Redis:
-
-sudo apt-get update
-
-sudo apt-get install redis
-
-Install Hiredis:
-
-sudo apt-get update
-
-sudo apt-get install libhiredis-dev
-
-Install CMake:
-
-sudo apt-get install cmake
+1. `sudo apt install curl`
+2. `curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash`
+3. `source ~/.bashrc`
+4. `nvm install node`
+--------------------
