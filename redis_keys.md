@@ -2,8 +2,9 @@
 
 ## Global
 
-* `start:acquisition` - Pub/Sub key used to signal that an acquisition is starting
-* `stop:acquisition` - Pub/Sub key used to signal that an acquisition is being stopped
+* `acquisition:command` - Pub/Sub key used to signal different commands with acquisitioning
+    * `start` : Signals the starting of an acquisition
+    * `stop` : Signals the stopping of an acquisition
 * `logs:<service_name>` - List key used to hold all the logs from each of the services
 * `system:shutdown` - Pub/Sub key makes all services cleanup before shutting down the system
 
