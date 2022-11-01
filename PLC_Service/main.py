@@ -7,12 +7,15 @@ import threading
 import sys
 
 def simulate():
+    weight = 50
     while not stop_thread:
         simulated_data = {
             "timestamp": datetime.utcnow(),
-            "temperature": random.randrange(30, 35),
-            "humidity": random.randrange(10, 20),
-            "airflow": random.randrange(5, 15)
+            "temperature": random.randrange(0, 50) / 10,
+            "humidity": random.randrange(60, 90),
+            "airFlow": random.randrange(16, 66) / 10,
+            "weight": weight,
+            "door": random.randrange(0, 1)
         }
 
         simulated_data_string = json.dumps(simulated_data, default=str)
@@ -20,6 +23,7 @@ def simulate():
         if acquisition_started:
             redis_context.publish("live:data", simulated_data_string)
 
+        weight = weight - 0.00001
         sleep(1)
 
 def shutdown(data):
@@ -27,30 +31,24 @@ def shutdown(data):
 
     service_running = False
 
-def stop(data):
+def acquisitionAction(command):
     global acquisition_started
 
-    acquisition_started = False
-    redis_context.rpush("logs:" + service_name, "Stopping Data Acquisition")
-
-def start(data):
-    global acquisition_started
-
-    acquisition_started = True
-    redis_context.rpush("logs:" + service_name, "Starting Data Acquisition")
+    if command["data"] == "start":
+        acquisition_started = True
+        redis_context.rpush("logs:" + service_name, "Starting Data Acquisition")
+    
+    if command["data"] == "stop":
+        acquisition_started = False
+        redis_context.rpush("logs:" + service_name, "Stopping Data Acquisition")
 
 def setup_subscribers():
-    global start_sub
-    global stop_sub
     global shutdown_sub
+    global acquisition_sub
 
-    start_sub = redis_context.pubsub()
-    start_sub.subscribe(**{'start:acquisition':start})
-    start_th = start_sub.run_in_thread(sleep_time=1, daemon=True)
-
-    stop_sub = redis_context.pubsub()
-    stop_sub.subscribe(**{'stop:acquisition':stop})
-    stop_th = stop_sub.run_in_thread(sleep_time=1, daemon=True)
+    acquisition_sub = redis_context.pubsub()
+    acquisition_sub.subscribe(**{'acquisition:command':acquisitionAction})
+    acquisition_th = acquisition_sub.run_in_thread(sleep_time=1, daemon=True)
 
     shutdown_sub = redis_context.pubsub()
     shutdown_sub.subscribe(**{'system:shutdown':shutdown})
@@ -66,8 +64,12 @@ def main():
     service_name = "plc_service"
 
     redis_context = redis.Redis(decode_responses=True, charset="utf-8")
-    if not redis_context.ping():
-        print("Error Connecting to Redis")
+
+    try:
+        redis_context.ping()
+    except Exception as ex:
+        print("Error connecting to Redis " + str(ex))
+        quit()
 
     redis_context.rpush("logs:" + service_name, "Successfully Connected to Redis")
 
@@ -82,8 +84,7 @@ def main():
     while service_running:
         sleep(1)
 
-    start_sub.unsubscribe()
-    stop_sub.unsubscribe()
+    acquisition_sub.unsubscribe()
     shutdown_sub.unsubscribe()
 
     stop_thread = True
