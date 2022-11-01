@@ -1,0 +1,13 @@
+[Unit]
+Description=Service to Access PLC
+After=redis.service
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+User=pi
+ExecStart=
+
+[Install]
+WantedBy=multi-usr.target
