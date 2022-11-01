@@ -1,7 +1,9 @@
 {
   "dependencies": {
     "@microsoft/signalr": "^6.0.7",
+    "async-mutex": "^0.4.0",
     "axios": "^0.27.2",
-    "config": "^3.3.7"
+    "config": "^3.3.7",
+    "redis": "^4.3.1"
   }
 }
