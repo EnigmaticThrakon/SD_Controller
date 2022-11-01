@@ -1,52 +1,119 @@
 process.env.NODE_ENV = 'config';
 
 const { spawn, exec, execSync } = require('child_process');
+const redis = require('redis');
+const main_redis_handler = redis.createClient();
+const live_data_subscriber = redis.createClient();
+const command_publisher = redis.createClient();
 const config = require('config');
+const Mutex = require('async-mutex').Mutex;
 
-var connectionInfo = {
+var connection_info = {
     "url": "http://paranoidandroid.network",
     "port": 52042
 };
 
-var deviceInfo = {};
-deviceInfo.serialNumber = execSync('cat /proc/cpuinfo | grep Serial').toString().split(':')[1].trim();
+var device_info = {};
+device_info.serialNumber = execSync('cat /proc/cpuinfo | grep Serial').toString().split(':')[1].trim();
 
 const ApiService = require('./services/api_service');
-const SignalRService = require('./services/signalR_service');
+var api_handler = new ApiService(connection_info.url, connection_info.port);
+var signalr = null;
+
+const { SignalRService, SignalRMethods } = require('./services/signalR_service');
 
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+var transmission_timer = setInterval(sendData, 1000);
 
-var apiHandler = new ApiService(connectionInfo.url, connectionInfo.port);
+const queue_mutext = new Mutex();
+var data_queue = [];
 
-run();
+api_handler.connect(device_info.serialNumber).then(response => {
+    if(response.success) {
+        device_info.unitId = response.data;
+        signalr = new SignalRService(connection_info.url, connection_info.port, device_info.unitId);
+        signalr.connect().then(resolved => {
+            connectRedis();
+        }, rejection => {
+            console.log("Error Connecting SignalR to Server: " + rejection);
+        });
+    } else {
+        var error_message = "Error Connecting to Server: " + response.data;
+        cleanup(error_message);
+    }
+});
+
+async function connectRedis() {
+    main_redis_handler.on('connect', () => {
+        console.log("Connected to Redis");
+        run();
+    });
+    main_redis_handler.on('error', err => {
+        var error_message = "Error Connecting to Redis: " + err;
+        cleanup(error_message);
+    })
+    main_redis_handler.connect();
+}
 
 async function run() {
-    var response = await apiHandler.connect(deviceInfo.serialNumber);
+    await live_data_subscriber.connect();
+    await command_publisher.connect();
 
-    if(response.success) {
-        deviceInfo.unitId = response.data;
-    } else {
-        console.log(response.data);
-        return;
-    }
+    live_data_subscriber.subscribe('live:data', async (data) => {
+        const release = await queue_mutext.acquire();
+        data_queue.push(JSON.parse(data));
+        release();
+    });
 
-    signalR = new SignalRService(connectionInfo.url, connectionInfo.port, deviceInfo.unitId);
-    signalR.connect();
+    signalr.receiveCommand(executeCommand);
+}
 
-    while(true) {
-        await delay(10000);
+async function sendData() {
+    var data = [];
+
+    const release = await queue_mutext.acquire();
+    data = data_queue;
+    data_queue = [];
+    release();
+
+    if(data.length > 0) {
+        signalr.sendMessage(SignalRMethods.LiveData, device_info.unitId, JSON.stringify(data));
     }
 }
-// var signalR = null;
 
-// run();
+async function executeCommand(message) {
+    if(command_publisher.isReady) {
+        switch(message.toString().toUpperCase()){
+            case "START":
+                command_publisher.publish('acquisition:command', 'start');
+                break;
+            case "STOP":
+                command_publisher.publish('acquisition:command', 'stop');
+                break;
+            case "SHUTDOWN":
+                break;
+            default:
+                console.log("Unrecognized message received");
+        }
+    } else {
+        console.log("Command Received Before Publisher Was Ready");
+    }
+}
 
-// async function run() {
-//     deviceInfo.unitId = await apiHandler.connect(deviceInfo.serialNumber);
+async function cleanup(error_message) {
+    clearInterval(transmission_timer);
+    live_data_subscriber.unsubscribe('live:data');
 
-//     signalR = new SignalRService(connectionInfo.url, connectionInfo.port, deviceInfo.unitId);
+    main_redis_handler.disconnect();
+    live_data_subscriber.disconnect();
+    command_publisher.disconnect();
 
-//     while(true) {
-//         await delay(10000);
-//     }
-// }
+    delay(1000);
+
+    if(error_message != null) {
+        console.log(error_message);
+        process.exit(1);
+    }
+
+    process.exit(0);
+}
