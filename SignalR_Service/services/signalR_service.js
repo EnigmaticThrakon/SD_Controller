@@ -1,6 +1,6 @@
 const signalR = require('@microsoft/signalr');
 
-module.exports = class SignalRService {
+class SignalRService {
     constructor(url, port, unitId){
         this.baseUrl = url;
         this.unitId = unitId;
@@ -12,8 +12,31 @@ module.exports = class SignalRService {
     }
 
     connect() {
-        this.hubConnection.start().then(t => {
-            console.log("connected");
-        })
+        return new Promise((resolve, reject) => {
+            this.hubConnection.start().then(t => {
+                console.log("SignalR Connected to Server");
+                resolve();
+            }).catch(err => {
+                console.log("Error Connecting SignalR to Server: " + err);
+                reject();
+            })
+        });
     }
+
+    receiveCommand(callbackFunction) {
+        this.hubConnection.on('ExecuteCommand', message => {
+            callbackFunction(message);
+        });
+    }
+
+    sendMessage(channel, unitId, data) {
+        this.hubConnection.send(channel, unitId, data);
+    }
+}
+
+module.exports = {
+    SignalRService: SignalRService,
+    SignalRMethods: Object.freeze({
+        LiveData: "LiveData"
+    })
 }
