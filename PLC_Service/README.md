@@ -20,9 +20,18 @@ be constantly restarted to attempt to fulfill it's purpose. If the program exits
 of 0, then the service will not be restarted, because this should only occur when a system shutdown is
 occurring
 
+## Prerequisites
+
+*This is assuming running on a Debian machine - typically python and pip are already installed*
+* Node is installed on the device
+    1. `sudo apt-get install python` 
+        * *You can replace `python` with `python3` depending on which version you want, make sure you use 
+            same selection for all subsequent commands*
+    2. `sudo apt-get install python-pip`
+
 ## Compiling
 
-*No compiling necessary since this is a Python program*
+Install modules utilizing the `pip install <module>` command if any module reference errors occur
 
 ## Debugging
 
