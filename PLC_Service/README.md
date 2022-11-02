@@ -5,6 +5,21 @@
 This service is responsible for listening to data coming in from the PLC
 and sending that data into Redis for it to be sent to its final destination
 
+## Expected Operation
+
+### General
+
+This service should be constantly reading data from the PLC and outputting that data to the console,
+if an acquisition has started then the service will send those values into the Redis database utilizing
+a pub/sub key.
+
+### Systemd Service Specific
+
+If the program exits with a status code that isn't 0 due to an error or exception, the service should
+be constantly restarted to attempt to fulfill it's purpose. If the program exits with a status code
+of 0, then the service will not be restarted, because this should only occur when a system shutdown is
+occurring
+
 ## Compiling
 
 *No compiling necessary since this is a Python program*
