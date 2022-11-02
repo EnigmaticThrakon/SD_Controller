@@ -1,12 +1,13 @@
 # Key Definitions
 
-## Global
+## System Commands
 
-* `acquisition:command` - Pub/Sub key used to signal different commands with acquisitioning
-    * `start` : Signals the starting of an acquisition
-    * `stop` : Signals the stopping of an acquisition
-* `logs:<service_name>` - List key used to hold all the logs from each of the services
-* `system:shutdown` - Pub/Sub key makes all services cleanup before shutting down the system
+* `acquisition:started`
+    * `1`: Acquisition has started and the system acts accordingly
+    * `0`: Acquisition has stopped and system remains idle (no live data passed into Redis)
+* `system:shutdown`
+    * `1`: Shutdown actions begin to be performed and device powers off
+    * `0`: System is on and operates normally
 
 ## PLC Service
 
