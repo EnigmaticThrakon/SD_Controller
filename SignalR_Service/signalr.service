@@ -4,10 +4,19 @@ After=redis.service
 
 [Service]
 Type=simple
-Restart=always
+
+#Have the service restart on anything other than a successful termination
+Restart=on-failure  
+
+#Restart the service every second if unsuccessful termination
 RestartSec=1
 User=pi
-ExecStart=
+WorkingDirectory=/home/pi/dev/SD_Controller/SignalR_Service
+ExecStart=/home/pi/.nvm/versions/node/v19.0.0/bin/node /home/pi/dev/SD_Controller/SignalR_Service/app.js
+
+#Make sure outputs are sent to the journal
+StandardOutput=journal+console
+StandardError=journal+console
 
 [Install]
-WantedBy=multi-usr.target
+WantedBy=multi-user.target
