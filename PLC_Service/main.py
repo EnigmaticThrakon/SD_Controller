@@ -3,64 +3,8 @@ import json
 import random
 from time import sleep
 import redis
-import threading
-import sys
-
-def simulate():
-    weight = 50
-    while not stop_thread:
-        simulated_data = {
-            "timestamp": datetime.utcnow(),
-            "temperature": random.randrange(0, 50) / 10,
-            "humidity": random.randrange(60, 90),
-            "airFlow": random.randrange(16, 66) / 10,
-            "weight": weight,
-            "door": random.randrange(0, 1)
-        }
-
-        simulated_data_string = json.dumps(simulated_data, default=str)
-        print(simulated_data_string)
-        if acquisition_started:
-            redis_context.publish("live:data", simulated_data_string)
-
-        weight = weight - 0.00001
-        sleep(1)
-
-def shutdown(data):
-    global service_running
-
-    service_running = False
-
-def acquisitionAction(command):
-    global acquisition_started
-
-    if command["data"] == "start":
-        acquisition_started = True
-        redis_context.rpush("logs:" + service_name, "Starting Data Acquisition")
-    
-    if command["data"] == "stop":
-        acquisition_started = False
-        redis_context.rpush("logs:" + service_name, "Stopping Data Acquisition")
-
-def setup_subscribers():
-    global shutdown_sub
-    global acquisition_sub
-
-    acquisition_sub = redis_context.pubsub()
-    acquisition_sub.subscribe(**{'acquisition:command':acquisitionAction})
-    acquisition_th = acquisition_sub.run_in_thread(sleep_time=1, daemon=True)
-
-    shutdown_sub = redis_context.pubsub()
-    shutdown_sub.subscribe(**{'system:shutdown':shutdown})
-    shutdown_th = shutdown_sub.run_in_thread(sleep_time=1, daemon=True)
 
 def main():
-    global redis_context
-    global service_name
-    global service_running
-    global acquisition_started
-    global stop_thread
-
     service_name = "plc_service"
 
     redis_context = redis.Redis(decode_responses=True, charset="utf-8")
@@ -73,23 +17,27 @@ def main():
 
     redis_context.rpush("logs:" + service_name, "Successfully Connected to Redis")
 
-    stop_thread = False
-    work_th = threading.Thread(target=simulate, daemon=True)
-    work_th.start()
+    weight = 50
+    stop_service = 0
+    while stop_service != 1:
+        simulated_data = {
+                "timestamp": datetime.utcnow(),
+                "temperature": random.randrange(0, 50) / 10,
+                "humidity": random.randrange(60, 90),
+                "airFlow": random.randrange(16, 66) / 10,
+                "weight": weight,
+                "door": random.randrange(0, 1)}
 
-    acquisition_started = False
-    setup_subscribers()
-    
-    service_running = True
-    while service_running:
-        sleep(1)
+        simulated_data_string = json.dumps(simulated_data, default=str)
+        print(simulated_data_string)
 
-    acquisition_sub.unsubscribe()
-    shutdown_sub.unsubscribe()
+        acquisition_started = int(redis_context.get("acquisition:started"))
+        if acquisition_started is not None and acquisition_started == 1:
+            print(simulated_data_string + " -> Redis")
+            redis_context.publish("live:data", simulated_data_string)
 
-    stop_thread = True
-    while work_th.is_alive():
-        work_th.join()
+        weight = weight - 0.00001
+        stop_service = int(redis_context.get('shutdown')) if redis_context.get('shutdown') is not None else 0
         sleep(1)
 
     redis_context.rpush("logs:" + service_name, "Shutting Down Service")
