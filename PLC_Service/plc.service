@@ -7,7 +7,8 @@ Type=simple
 Restart=always
 RestartSec=1
 User=pi
-ExecStart=
+WorkingDirectory=/home/pi/dev/SD_Controller/PLC_Service/
+ExecStart=/usr/bin/python3 /home/pi/dev/SD_Controller/PLC_Service/main.py
 
 [Install]
-WantedBy=multi-usr.target
+WantedBy=multi-user.target
