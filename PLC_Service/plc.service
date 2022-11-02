@@ -4,13 +4,19 @@ After=redis.service
 
 [Service]
 Type=simple
-Restart=on-failure
+
+#Have the service restart on anything other than a successful termination
+Restart=on-failure  
+
+#Restart the service every second if unsuccessful termination
 RestartSec=1
 User=pi
 WorkingDirectory=/home/pi/dev/SD_Controller/PLC_Service/
 ExecStart=/usr/bin/python3 /home/pi/dev/SD_Controller/PLC_Service/main.py
-StandardOutput=journal
-StandardError=journal
+
+#Make sure outputs are sent to the journal
+StandardOutput=journal+console
+StandardError=journal+console
 
 [Install]
 WantedBy=multi-user.target
