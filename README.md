@@ -35,6 +35,13 @@ network:
             access-points:
                 "<wifi-name>":
                     password: "<password>"
+    ethernets:
+        eth0:
+            dhcp4: no
+            addresses: [<static_ip>/24]
+            gateway4: <static_ip_ending_in_.1>
+            nameservers:
+                addresses: [8.8.8.8]
 ```
 
 *For connecting to an enterprise network*
@@ -81,3 +88,9 @@ network:
 3. `source ~/.bashrc`
 4. `nvm install node`
 --------------------
+
+### Python Modules
+
+`pip instal ...`
+* `redis`
+* `pylogix`
