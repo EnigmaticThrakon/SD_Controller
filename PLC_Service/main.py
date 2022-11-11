@@ -5,11 +5,15 @@ import random
 from time import sleep
 import redis
 
+#L00S05O00 3200 - 10000
+
 def writePLC(data):
-    comm = PLC('10.1.1.10')
+    comm = PLC('10.1.1.10', timeout=1)
 
     if data is not None and data["data"] is not None:
-        ret = comm.Write('DiskEnable', int(data["data"]))
+        writeObj = json.loads(data["data"])
+
+        ret = comm.Write([('L00S05O00', writeObj['AirFlow']), ('DiskEnable', writeObj['Humidity'])])
 
 # Main function to handle the operations of the service
 def main():
@@ -39,7 +43,7 @@ def main():
     # Variable to hold whether or not the service should be stopped
     stop_service = 0
 
-    comm = PLC('10.1.1.10')
+    comm = PLC('10.1.1.10', timeout=1)
 
     # Starting value of the weight (used for simulating)
     weight = 50
@@ -76,7 +80,7 @@ def main():
         stop_service = int(redis_context.get('shutdown')) if redis_context.get('shutdown') is not None else 0
 
         # Letting the loop sleep for a second (might be removed after no longer simulating)
-        sleep(0.1)
+        sleep(0.5)
 
     action_listener.unsubscribe('write:plc')
 
