@@ -83,17 +83,29 @@ async function sendData() {
 
 async function executeCommand(message) {
     if(command_publisher.isReady) {
-        switch(message.toString().toUpperCase()){
-            case "START":
-                command_publisher.publish('acquisition:command', 'start');
-                break;
-            case "STOP":
-                command_publisher.publish('acquisition:command', 'stop');
-                break;
-            case "SHUTDOWN":
-                break;
-            default:
-                console.log("Unrecognized message received");
+        if(message.toString().toUpperCase().includes("UPDATEPARAMETERS")) {
+            var publishData = message.toString().substring(message.toString().indexOf(' ') + 1);
+            main_redis_handler.publish('write:plc', publishData);
+        } else {
+            switch(message.toString().toUpperCase()){
+                case "START":
+                    main_redis_handler.set('acquisition:started', 1);
+                    break;
+                case "STOP":
+                    main_redis_handler.set('acquisition:started', 0);
+                    break;
+                case "SHUTDOWN":
+                    break;
+                case "HUMIDITY-START":
+                    main_redis_handler.publish("write:plc", "hStart");
+                    break;
+                case "HUMIDITY-STOP":
+                    main_redis_handler.publish('write:plc', 'hStop');
+                    break;
+                default:
+    
+                    console.log("Unrecognized message received");
+            }
         }
     } else {
         console.log("Command Received Before Publisher Was Ready");
