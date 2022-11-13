@@ -7,12 +7,19 @@ import redis
 
 #L00S05O00 3200 - 10000
 
+# Function used to be called to write to the PLC
 def writePLC(data):
+
+    # Make a connection to the PLC
     comm = PLC('10.1.1.10', timeout=1)
 
+    # Make sure the data passed in isn't null and has the "data" key
     if data is not None and data["data"] is not None:
+
+        # Parse the data load of the object passed in
         writeObj = json.loads(data["data"])
 
+        # Write the correct values to the correct tags on the PLC
         ret = comm.Write([('L00S05O00', writeObj['AirFlow']), ('DiskEnable', writeObj['Humidity'])])
 
 # Main function to handle the operations of the service
@@ -36,6 +43,7 @@ def main():
     #       to Redis
     redis_context.rpush("logs:" + service_name, "Successfully Connected to Redis")
 
+    # Setup a pub/sub and a thread to listen for publishings on the 'write:plc' channel
     action_listener = redis_context.pubsub()
     action_listener.subscribe(**{'write:plc':writePLC})
     action_listener_th = action_listener.run_in_thread(sleep_time=1, daemon=True)
@@ -43,6 +51,7 @@ def main():
     # Variable to hold whether or not the service should be stopped
     stop_service = 0
 
+    # Create a connection to the PLC with a set timeout to prvent block for too long
     comm = PLC('10.1.1.10', timeout=1)
 
     # Starting value of the weight (used for simulating)
@@ -51,6 +60,7 @@ def main():
     # While loop to continue running while the service is running
     while stop_service != 1:
 
+        # Read in the value that the tag holds on the PLC
         ret = comm.Read('L00S02I00')
 
         # Data blob that is composed into an object before being sent into Redis
@@ -82,6 +92,7 @@ def main():
         # Letting the loop sleep for a second (might be removed after no longer simulating)
         sleep(0.5)
 
+    # Unsubscribe the channel as closing
     action_listener.unsubscribe('write:plc')
 
     # Pushing another log to show the service is shutting down and closing the connection to Redis
