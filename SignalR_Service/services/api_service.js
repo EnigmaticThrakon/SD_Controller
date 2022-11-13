@@ -1,11 +1,16 @@
+// Using the axios class for http communications
 const axios = require('axios');
 
+// Class for performing api communications
 module.exports = class ApiService {
+
+    // Pass in the url and port for the server
     constructor(url, port) {
         this.baseUrl = url;
         this.basePort = port;
     }
 
+    // Function to make the initial api call to the server
     async connect(serialNumber) {
         return await this.performPut('api/Unit/UnitData', {
             id: null,
