@@ -20,7 +20,7 @@ def writePLC(data):
         writeObj = json.loads(data["data"])
 
         # Write the correct values to the correct tags on the PLC
-        ret = comm.Write([('L00S05O00', writeObj['AirFlow']), ('DiskEnable', writeObj['Humidity'])])
+        ret = comm.Write([('L00S05O00', int(writeObj['AirFlow'])), ('DiskEnable', writeObj['Humidity'] == 1.0)])
 
 # Main function to handle the operations of the service
 def main():
