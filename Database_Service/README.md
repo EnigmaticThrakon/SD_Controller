@@ -28,4 +28,17 @@ mkdir build && cd build
 cmake -DREDIS_PLUS_PLUS_BUILD_TEST=OFF ..
 make && sudo make install
 cd ~ && sudo rm -r hiredis && sudo rm -r redis-plus-plus
+git clone https://github.com/nlohmann/json.git
+cd json
+mkdir build && cd build
+cmake -DJSON_BuildTests=OFF ..
+make
+sudo make install
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
+
+Debugging
+VS Code Extensions: C/C++ Extension Pack, CMake Tools
+Open Folder of Database_Service
+Build the targets
+Select the database_service target
+Start CMake Debugging
