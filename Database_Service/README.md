@@ -18,3 +18,14 @@ This service is dedicated to handling data that needs to be inserted, modified, 
 1. Move to the `build` directory
 2. Execute the command `./database_service`
 
+Installing dependencies
+sudo apt-get install libsqlite3-dev
+cd ~ && git clone https://github.com/redis/hiredis.git
+cd hiredis && make && sudo make install
+cd ~ && git clone https://github.com/sewenew/redis-plus-plus.git
+cd redis-plus-plus
+mkdir build && cd build
+cmake -DREDIS_PLUS_PLUS_BUILD_TEST=OFF ..
+make && sudo make install
+cd ~ && sudo rm -r hiredis && sudo rm -r redis-plus-plus
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"
