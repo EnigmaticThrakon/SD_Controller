@@ -50,7 +50,9 @@ If the program exists with a status code that isn't a `Success` then it should r
     cd ..
     sudo rm -r json
     ```
-* Update Libraries Path: `export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"`
+* Update Libraries Path: 
+    1. Add the line `export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib"` to the end of the `~/.bashrc`
+    2. Enable the changes by running the command `source ~/.bashrc`
 
 ## Compiling
 
