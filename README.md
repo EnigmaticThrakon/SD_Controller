@@ -69,12 +69,12 @@ network:
 
 ### SQLite
 
-> `sudo apt-get install sqlite3 && sudo apt-get install libsqlite3-dev`
+> `sudo apt-get install sqlite3`
 --------------------
 
 ### Redis
 
-> `sudo apt-get install redis && sudo apt-get install libhiredis-dev`
+> `sudo apt-get install redis`
 --------------------
 
 ### CMake
