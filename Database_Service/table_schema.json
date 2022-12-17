@@ -1,0 +1,36 @@
+{
+    "tables":[
+        "Runs",
+        "RunData"
+    ],
+    "Runs":{
+        "columns":[
+            "Id",
+            "StartTime",
+            "EndTime",
+            "Duration",
+            "NumEntries"
+        ],
+        "Id":"TEXT",
+        "StartTime":"INTEGER",
+        "EndTime":"INTEGER",
+        "Duration":"INTEGER",
+        "NumEntries":"INTEGER"
+    },
+    "RunData":{
+        "columns":[
+            "Timestamp",
+            "Temperature",
+            "Weight",
+            "AirFlow",
+            "Humidity",
+            "DoorClosed"
+        ],
+        "Timestamp":"TEXT",
+        "Temperature":"NUMERIC",
+        "Weight":"NUMERIC",
+        "AirFlow":"NUMERIC",
+        "Humidity":"NUMERIC",
+        "DoorClosed":"INTEGER"
+    }
+}
